@@ -1,7 +1,9 @@
 <?php
-require '../auth.php';
+require_once '../auth.php';
 require_login();
-require '../db.php';
+require_once '../db.php';
+$pageTitle = "商品一覧";
+include '../layout/header.php';
 
 $stmt = $pdo->query("SELECT * FROM items ORDER BY id DESC");
 $items = $stmt->fetchAll();
@@ -37,5 +39,4 @@ $items = $stmt->fetchAll();
         </tr>
         <?php endforeach; ?>
     </table>
-</body>
-</html>
+<?php include '../layout/footer.php'; ?>

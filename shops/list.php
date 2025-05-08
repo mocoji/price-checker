@@ -1,5 +1,9 @@
 <?php
-require '../db.php';
+require_once '../auth.php';
+require_login();
+require_once '../db.php';
+$pageTitle = "店舗一覧";
+include '../layout/header.php';
 
 $stmt = $pdo->query("SELECT * FROM shops ORDER BY id DESC");
 $shops = $stmt->fetchAll();
@@ -31,5 +35,4 @@ $shops = $stmt->fetchAll();
         </tr>
         <?php endforeach; ?>
     </table>
-</body>
-</html>
+<?php include '../layout/footer.php'; ?>

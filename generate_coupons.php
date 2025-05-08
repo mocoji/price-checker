@@ -1,5 +1,9 @@
 <?php
-require 'db.php';
+require_once __DIR__ . '/db.php';  // ← これが必要！
+require 'auth.php';
+require_login();
+$pageTitle = "クーポン提案";
+include 'layout/header.php';
 
 // 自社店舗IDを取得
 $myShopStmt = $pdo->query("SELECT id FROM shops WHERE is_own_shop = 1 LIMIT 1");
@@ -78,5 +82,4 @@ foreach ($items as $item) {
         </tr>
         <?php endforeach; ?>
     </table>
-</body>
-</html>
+<?php include 'layout/footer.php'; ?>

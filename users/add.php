@@ -1,7 +1,9 @@
 <?php
-require '../db.php';
-require '../auth.php';
+require_once '../auth.php';
 require_login();
+require_once '../db.php';
+$pageTitle = "ユーザー登録";
+include '../layout/header.php';
 
 if (!is_admin()) {
     die('管理者専用ページです。');
@@ -43,5 +45,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </label><br><br>
         <button type="submit">登録する</button>
     </form>
-</body>
-</html>
+<?php include '../layout/footer.php'; ?>

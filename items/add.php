@@ -1,6 +1,9 @@
 <?php
-require '../db.php';
-require '../auth.php';
+require_once '../auth.php';
+require_login();
+require_once '../db.php';
+$pageTitle = "商品登録";
+include '../layout/header.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item_code = $_POST['item_code'];
@@ -35,5 +38,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">登録</button>
         <a href="list.php">戻る</a>
     </form>
-</body>
-</html>
+<?php include '../layout/footer.php'; ?>

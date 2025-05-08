@@ -1,5 +1,10 @@
 <?php
-require '../db.php';
+require_once '../auth.php';
+require_login();
+require_once '../db.php';
+$pageTitle = "価格比較";
+include '../layout/header.php';
+
 
 // 商品一覧と各店舗の最新価格を表示する（JOINで一括取得）
 $sql = "
@@ -62,5 +67,4 @@ foreach ($rows as $row) {
         <?php endif; ?>
         <hr>
     <?php endforeach; ?>
-</body>
-</html>
+<?php include '../layout/footer.php'; ?>
