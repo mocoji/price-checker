@@ -10,7 +10,7 @@ if (!isset($data['order']) || !is_array($data['order'])) {
     exit("Invalid data");
 }
 
-$stmt = $pdo->prepare("UPDATE products SET sort_order = ? WHERE id = ?");
+$stmt = $pdo->prepare("UPDATE shops SET sort_order = ? WHERE id = ?");
 foreach ($data['order'] as $position => $id) {
     $stmt->execute([$position, $id]);
 }
