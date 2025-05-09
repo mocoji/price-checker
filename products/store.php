@@ -3,12 +3,13 @@ require_once '../auth.php';
 require_login();
 require_once '../db.php';
 
-$shop_id = $_POST['shop_id'] ?? null;
-$item_code = $_POST['item_code'] ?? '';
-$item_name = $_POST['item_name'] ?? '';
-$category = $_POST['category'] ?? '';
-$price = $_POST['price'] ?? null;
-$image_url = $_POST['thumbnail_url'] ?? '';
+$shop_id     = $_POST['shop_id'] ?? null;
+$item_code   = $_POST['item_code'] ?? '';
+$item_name   = $_POST['item_name'] ?? '';
+$category    = $_POST['category'] ?? '';
+$price       = $_POST['price'] ?? null;
+$image_url   = $_POST['thumbnail_url'] ?? '';
+$maker_id    = $_POST['maker_id'] ?? null;
 
 if (!$shop_id || !$item_code || !$item_name || !$price) {
     die("必須項目が不足しています");
@@ -20,8 +21,8 @@ $stmt->execute([$item_name]);
 $product_id = $stmt->fetchColumn();
 
 if (!$product_id) {
-    $stmt = $pdo->prepare("INSERT INTO products (name, category, image_url) VALUES (?, ?, ?)");
-    $stmt->execute([$item_name, $category, $image_url]);
+    $stmt = $pdo->prepare("INSERT INTO products (name, category, image_url, maker_id) VALUES (?, ?, ?, ?)");
+    $stmt->execute([$item_name, $category, $image_url, $maker_id]);
     $product_id = $pdo->lastInsertId();
 }
 
@@ -31,10 +32,9 @@ $stmt = $pdo->prepare("
     VALUES (?, ?, ?, ?, '', NOW(), 1)
 ");
 $stmt->execute([$product_id, $shop_id, $item_code, $price]);
+$shopItemId = $pdo->lastInsertId();
 
-$shopItemId = $pdo->lastInsertId(); // ← ここでshop_items.idを取得
-
-// ✅ STEP 3: 履歴テーブルに記録
+// STEP 3: 履歴テーブルに記録
 $stmt = $pdo->prepare("
     INSERT INTO price_history (shop_item_id, price, recorded_at)
     VALUES (?, ?, NOW())

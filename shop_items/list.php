@@ -28,9 +28,22 @@ function getLatestPrices($pdo, $productId) {
     $stmt->execute([$productId]);
     return $stmt->fetchAll();
 }
+
+function getMakerName($pdo, $maker_id) {
+    if (!$maker_id) return '-';
+    static $cache = [];
+    if (!isset($cache[$maker_id])) {
+        $stmt = $pdo->prepare("SELECT name FROM makers WHERE id = ?");
+        $stmt->execute([$maker_id]);
+        $cache[$maker_id] = $stmt->fetchColumn() ?: '-';
+    }
+    return $cache[$maker_id];
+}
+
+
 ?>
 
-<h1 class="mb-3">価格比較（自社 vs 競合）</h1>
+<h1 class="mb-3">最安比較（自社 vs 競合）</h1>
 
 <!-- ✅ 自社店舗切り替え -->
 <form method="get" class="mb-4 d-flex align-items-center">
@@ -64,18 +77,24 @@ function getLatestPrices($pdo, $productId) {
         $myShopName = '';
         $minCompShopName = '';
 
-        foreach ($prices as $p) {
-            if ($p['shop_id'] == $selectedShopId) {
-                $myPrice = $p['price'];
-                $myShopItemId = $p['id'];
-                $myShopName = $p['shop_name'];
-            } else {
-                if ($minCompPrice === null || $p['price'] < $minCompPrice) {
-                    $minCompPrice = $p['price'];
-                    $minCompShopName = $p['shop_name'];
-                }
-            }
+		foreach ($prices as $p) {
+			if ($p['shop_id'] == $selectedShopId) {
+		$myPrice = $p['price'];
+		$myShopItemId = $p['id'];
+        $myShopName = $p['shop_name'];
+    }
+}
+
+// 最安競合価格の取得（自社以外のみ）
+		foreach ($prices as $p) {
+			if ($p['shop_id'] != $selectedShopId && !$p['is_own_shop']) {
+				if ($minCompPrice === null || $p['price'] < $minCompPrice) {
+            $minCompPrice = $p['price'];
+            $minCompShopName = $p['shop_name'];
         }
+    }
+}
+
 
         $diff = ($myPrice !== null && $minCompPrice !== null) ? $myPrice - $minCompPrice : null;
     ?>
@@ -84,6 +103,7 @@ function getLatestPrices($pdo, $productId) {
         <td>
             <strong><?= htmlspecialchars($product['name']) ?></strong><br>
             <small>カテゴリ：<?= htmlspecialchars($product['category']) ?></small>
+			<small>メーカー名：<?= htmlspecialchars(getMakerName($pdo, $product['maker_id'])) ?></small>
         </td>
         <td class="text-primary fw-bold">
             <?= $myPrice !== null ? "¥" . number_format($myPrice) . "<br><small>（{$myShopName}）</small>" : '-' ?>

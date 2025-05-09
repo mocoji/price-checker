@@ -18,14 +18,18 @@ if (!$product) {
     exit;
 }
 
+// メーカー一覧取得
+$makers = $pdo->query("SELECT * FROM makers ORDER BY name ASC")->fetchAll();
+
 // 更新処理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $thumbnail_url = $_POST['image_url'];
     $category = $_POST['category'];
+    $maker_id = $_POST['maker_id'] !== '' ? $_POST['maker_id'] : null;
 
-    $stmt = $pdo->prepare("UPDATE products SET name = ?, image_url = ?, category = ? WHERE id = ?");
-    $stmt->execute([$name, $thumbnail_url, $category, $product_id]);
+    $stmt = $pdo->prepare("UPDATE products SET name = ?, image_url = ?, category = ?, maker_id = ? WHERE id = ?");
+    $stmt->execute([$name, $thumbnail_url, $category, $maker_id, $product_id]);
 
     header("Location: ../shop_items/list.php");
     exit;
@@ -53,10 +57,22 @@ include '../layout/header.php';
         <?php endif; ?>
     </div>
 
-    <div class="mb-4">
+    <div class="mb-3">
         <label for="category" class="form-label">カテゴリ</label>
         <input type="text" class="form-control" id="category" name="category"
                value="<?= htmlspecialchars($product['category']) ?>">
+    </div>
+
+    <div class="mb-4">
+        <label for="maker_id" class="form-label">メーカー</label>
+        <select name="maker_id" id="maker_id" class="form-select">
+            <option value="">-- 選択してください --</option>
+            <?php foreach ($makers as $maker): ?>
+                <option value="<?= $maker['id'] ?>" <?= $product['maker_id'] == $maker['id'] ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($maker['name']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
     </div>
 
     <div class="d-flex justify-content-between">

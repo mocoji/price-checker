@@ -7,11 +7,25 @@ include '../layout/header.php';
 
 // 店舗一覧取得（プルダウン用）
 $shops = $pdo->query("SELECT * FROM shops ORDER BY is_own_shop DESC, shop_name")->fetchAll();
+$makers = $pdo->query("SELECT * FROM makers ORDER BY name ASC")->fetchAll();
+
 ?>
 
 <h1 class="mb-4">商品登録</h1>
 
 <form method="post" action="store.php" class="card shadow-sm p-4 bg-white">
+	<div class="mb-3">
+    <label for="maker_id" class="form-label">メーカー</label>
+    <select name="maker_id" id="maker_id" class="form-select">
+        <option value="">-- 選択してください --</option>
+        <?php foreach ($makers as $maker): ?>
+            <option value="<?= $maker['id'] ?>" <?= isset($product['maker_id']) && $product['maker_id'] == $maker['id'] ? 'selected' : '' ?>>
+                <?= htmlspecialchars($maker['name']) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
+
     <div class="mb-3">
         <label for="shop_id" class="form-label">店舗選択</label>
         <select name="shop_id" id="shop_id" class="form-select" required>

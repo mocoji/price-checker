@@ -6,10 +6,26 @@ $pageTitle = "商品一覧";
 include '../layout/header.php';
 
 // 表示ルールの取得
-$mode = $_GET['mode'] ?? 'min_price'; // デフォルトは最安
+$mode = $_GET['mode'] ?? 'min_price'; // 自社価格表示ルール
+$makerFilter = $_GET['maker_id'] ?? ''; // メーカー絞り込み
 
-$products = $pdo->query("SELECT * FROM products ORDER BY sort_order ASC, id DESC")->fetchAll();
+// メーカー一覧取得
+$makers = $pdo->query("SELECT * FROM makers ORDER BY name ASC")->fetchAll();
 
+// 商品一覧取得（絞り込みあり）
+$where = '';
+$params = [];
+
+if ($makerFilter !== '') {
+    $where = 'WHERE p.maker_id = ?';
+    $params[] = $makerFilter;
+}
+
+$stmt = $pdo->prepare("SELECT p.* FROM products p $where ORDER BY sort_order ASC, id DESC");
+$stmt->execute($params);
+$products = $stmt->fetchAll();
+
+// 店舗価格取得関数
 function getShopPrices($pdo, $productId) {
     $stmt = $pdo->prepare("
         SELECT si.price, s.shop_name, s.is_own_shop, si.created_at
@@ -20,18 +36,39 @@ function getShopPrices($pdo, $productId) {
     $stmt->execute([$productId]);
     return $stmt->fetchAll();
 }
+
+// メーカー名取得関数
+function getMakerName($pdo, $maker_id) {
+    if (!$maker_id) return '-';
+    $stmt = $pdo->prepare("SELECT name FROM makers WHERE id = ?");
+    $stmt->execute([$maker_id]);
+    return $stmt->fetchColumn() ?: '-';
+}
 ?>
 
 <h1 class="mb-4">商品一覧</h1>
 
-<!-- 表示ルール選択フォーム -->
-<form method="get" class="mb-3">
-    <label for="mode" class="form-label">自社表示ルール：</label>
-    <select name="mode" id="mode" class="form-select" style="max-width: 300px;" onchange="this.form.submit()">
-        <option value="min_price" <?= $mode === 'min_price' ? 'selected' : '' ?>>最安値</option>
-        <option value="max_price" <?= $mode === 'max_price' ? 'selected' : '' ?>>最高値</option>
-        <option value="first_entry" <?= $mode === 'first_entry' ? 'selected' : '' ?>>登録が早い</option>
-    </select>
+<!-- 絞り込みフォーム -->
+<form method="get" class="row g-2 mb-4">
+    <div class="col-auto">
+        <label for="maker_id" class="form-label">メーカー：</label>
+        <select name="maker_id" id="maker_id" class="form-select" onchange="this.form.submit()">
+            <option value="">-- 全て --</option>
+            <?php foreach ($makers as $maker): ?>
+                <option value="<?= $maker['id'] ?>" <?= $makerFilter == $maker['id'] ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($maker['name']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <div class="col-auto">
+        <label for="mode" class="form-label">自社表示ルール：</label>
+        <select name="mode" id="mode" class="form-select" onchange="this.form.submit()">
+            <option value="min_price" <?= $mode === 'min_price' ? 'selected' : '' ?>>最安値</option>
+            <option value="max_price" <?= $mode === 'max_price' ? 'selected' : '' ?>>最高値</option>
+            <option value="first_entry" <?= $mode === 'first_entry' ? 'selected' : '' ?>>登録が早い</option>
+        </select>
+    </div>
 </form>
 
 <div class="d-flex justify-content-between mb-3">
@@ -84,7 +121,10 @@ function getShopPrices($pdo, $productId) {
             <?php endif; ?>
             <div class="card-body">
                 <h5 class="card-title"><?= htmlspecialchars($product['name']) ?></h5>
-                <p class="card-text"><small class="text-muted">カテゴリ：<?= htmlspecialchars($product['category']) ?></small></p>
+                <p class="card-text"><small class="text-muted">
+                    カテゴリ：<?= htmlspecialchars($product['category']) ?><br>
+                    メーカー：<?= htmlspecialchars(getMakerName($pdo, $product['maker_id'])) ?>
+                </small></p>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         自社（<?= htmlspecialchars($myShopName) ?>）：<?= $myPrice !== null ? '¥' . number_format($myPrice) : '-' ?><br>

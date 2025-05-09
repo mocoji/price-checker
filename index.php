@@ -34,6 +34,17 @@ $products = $stmt->fetchAll();
             </div>
         </div>
     </div>
+	
+	    <div class="col">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">メーカーマスタ管理</h5>
+                <p class="card-text">メーカーの情報を管理します</p>
+                <a href="makers/add.php" class="btn btn-outline-primary">＋ メーカー登録</a>
+                <a href="makers/list.php" class="btn btn-outline-secondary"> メーカー覧</a>
+            </div>
+        </div>
+    </div>
 
     <div class="col">
         <div class="card shadow-sm h-100">

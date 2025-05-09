@@ -28,6 +28,17 @@ $priceMap = [];
 foreach ($priceStmt as $row) {
     $priceMap[$row['product_id']][$row['shop_id']] = $row['price'];
 }
+
+// メーカー名取得関数
+function getMakerName($pdo, $maker_id) {
+    if (!$maker_id) return '-';
+    $stmt = $pdo->prepare("SELECT name FROM makers WHERE id = ?");
+    $stmt->execute([$maker_id]);
+    return $stmt->fetchColumn() ?: '-';
+}
+
+
+
 ?>
 
 <div class="container py-4">
@@ -84,6 +95,7 @@ foreach ($priceStmt as $row) {
                     <td>
                         <strong><?= htmlspecialchars($product['name']) ?></strong><br>
                         <small class="text-muted"><?= htmlspecialchars($product['category']) ?></small>
+						<small>メーカー名：<?= htmlspecialchars(getMakerName($pdo, $product['maker_id'])) ?></small>
                     </td>
                     <td class="text-primary fw-bold">
                         <?= $myPrice !== null ? '¥' . number_format($myPrice) : '-' ?>
