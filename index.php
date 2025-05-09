@@ -23,11 +23,23 @@ include __DIR__ . '/layout/header.php';
             <div class="card-body">
                 <h5 class="card-title">📦 商品マスタ管理</h5>
                 <p class="card-text">商品情報を登録し、価格比較のベースにします。</p>
-                <a href="products/add.php" class="btn btn-outline-primary">開く</a>
+               <a href="products/add.php" class="btn btn-outline-primary">＋ 商品登録</a>
+                <a href="products/list.php" class="btn btn-outline-secondary">📋 商品一覧</a><br>
             </div>
         </div>
     </div>
+	
+	<div class="col">
+    <div class="card shadow-sm h-100">
+        <div class="card-body">
+            <h5 class="card-title">🧩 競合統合</h5>
+            <p class="card-text">類似商品を統合して、価格比較の精度を高めます。</p>
+            <a href="products/merge.php" class="btn btn-outline-primary">統合ツールを開く</a>
+        </div>
+    </div>
+</div>
 
+	
     <div class="col">
         <div class="card shadow-sm h-100">
             <div class="card-body">

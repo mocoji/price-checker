@@ -1,13 +1,13 @@
 <?php
-require 'generate_coupons.php'; // $couponsが生成される想定
+session_start();
 
 header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="coupons.csv"');
 
-$output = fopen('php://output', 'w');
+$coupons = $_SESSION['coupons'] ?? [];
 
-// CSVヘッダー（楽天RMS用）
-fputcsv($output, ['coupon_name', 'coupon_code', 'discount_amount', 'valid_from', 'valid_to', 'min_purchase', 'usage_limit']);
+$output = fopen('php://output', 'w');
+fputcsv($output, ['クーポン名', 'コード', '割引金額', '有効期間（From）', '有効期間（To）', '最低購入金額', '使用制限']);
 
 foreach ($coupons as $c) {
     fputcsv($output, [
@@ -20,5 +20,6 @@ foreach ($coupons as $c) {
         $c['usage_limit']
     ]);
 }
+
 fclose($output);
 exit;

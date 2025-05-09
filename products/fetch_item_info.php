@@ -2,7 +2,8 @@
 header('Content-Type: application/json');
 
 // 楽天APIの設定（あなたのアプリIDに変更してください）
-$applicationId = '1076284524592798370'; // ← ★必ず差し替えてください！
+require_once '../lib/rakuten.php'; //
+$applicationId = getRakutenApplicationId(); // 
 
 $code = $_GET['code'] ?? '';
 $shopId = $_GET['shop_id'] ?? '';

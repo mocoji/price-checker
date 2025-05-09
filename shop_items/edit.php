@@ -75,5 +75,8 @@ include '../layout/header.php';
                value="<?= htmlspecialchars($item['url']) ?>">
     </div>
 
-    <div class="d-flex justify-content-between">
-        <a href="list.php" class="btn btn-outline-secondary">戻
+<div class="d-flex justify-content-between mt-4">
+    <a href="list.php" class="btn btn-outline-secondary">戻る</a>
+    <button type="submit" class="btn btn-primary">更新する</button>
+</div>
+

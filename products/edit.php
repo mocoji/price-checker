@@ -60,7 +60,7 @@ include '../layout/header.php';
     </div>
 
     <div class="d-flex justify-content-between">
-        <a href="../shop_items/list.php" class="btn btn-outline-secondary">戻る</a>
+        <a href="../products/list.php" class="btn btn-outline-secondary">戻る</a>
         <button type="submit" class="btn btn-primary">更新する</button>
     </div>
 </form>
