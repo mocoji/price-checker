@@ -50,7 +50,8 @@ $products = $stmt->fetchAll();
             <div class="card-body">
                 <h5 class="card-title">💰 価格比較画面</h5>
                 <p class="card-text">自社と競合の価格差を一覧で比較します。</p>
-                <a href="shop_items/list.php" class="btn btn-outline-primary">開く</a>
+                <a href="shop_items/list.php" class="btn btn-outline-primary">最安比較</a>
+				<a href="products/price_matrix.php" class="btn btn-outline-primary">一覧比較</a>
             </div>
         </div>
     </div>
@@ -72,6 +73,7 @@ $products = $stmt->fetchAll();
                 <h5 class="card-title">👤 ユーザー登録</h5>
                 <p class="card-text">ログインユーザーと権限を管理します。</p>
                 <a href="users/add.php" class="btn btn-outline-primary">登録</a>
+				<a href="users/list.php" class="btn btn-outline-primary">一覧</a>
             </div>
         </div>
     </div>
@@ -87,7 +89,7 @@ $products = $stmt->fetchAll();
     </div>
     <?php endif; ?>
 
-    <div class="col">
+<!--    <div class="col">
         <div class="card shadow-sm h-100 border-danger">
             <div class="card-body">
                 <h5 class="card-title text-danger">🚪 ログアウト</h5>
@@ -97,7 +99,8 @@ $products = $stmt->fetchAll();
         </div>
     </div>
 </div>
-
+-->
+	
 <!-- 📊 商品選択式価格履歴表示 -->
 <div class="card shadow-sm mt-4">
     <div class="card-body">

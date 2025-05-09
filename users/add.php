@@ -43,7 +43,7 @@ include '../layout/header.php';
     </div>
 
     <div class="d-flex justify-content-between">
-        <a href="list.php" class="btn btn-outline-secondary">戻る</a>
+        <a href="../index.php" class="btn btn-outline-secondary">戻る</a>
         <button type="submit" class="btn btn-primary">登録する</button>
     </div>
 </form>

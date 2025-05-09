@@ -27,14 +27,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="ja">
-<head><meta charset="UTF-8"><title>ログイン</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>ログイン | 楽天価格比較</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .login-box {
+            max-width: 400px;
+            margin: 100px auto;
+        }
+    </style>
+</head>
 <body>
-    <h1>ログイン</h1>
-    <?php if ($error): ?><p style="color:red"><?= $error ?></p><?php endif; ?>
-    <form method="post">
-        <label>ユーザー名：<input type="text" name="username" required></label><br><br>
-        <label>パスワード：<input type="password" name="password" required></label><br><br>
-        <button type="submit">ログイン</button>
-    </form>
+
+<div class="container">
+    <div class="card login-box shadow">
+
+        <div class="card-body">
+            <?php if ($error): ?>
+                <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+            <?php endif; ?>
+            <form method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">ユーザー名</label>
+                    <input type="text" name="username" id="username" class="form-control" required autofocus>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">パスワード</label>
+                    <input type="password" name="password" id="password" class="form-control" required>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">ログイン</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

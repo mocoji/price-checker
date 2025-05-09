@@ -5,13 +5,19 @@ require_once '../db.php';
 $pageTitle = "価格比較一覧";
 include '../layout/header.php';
 
-// 商品一覧を取得
-$products = $pdo->query("SELECT * FROM products ORDER BY id DESC")->fetchAll();
+// GETで選択された自社店舗ID
+$selectedShopId = $_GET['my_shop_id'] ?? null;
 
-// 自社ショップIDを取得
-$own_shop_stmt = $pdo->query("SELECT id FROM shops WHERE is_own_shop = 1 LIMIT 1");
-$own_shop_id = $own_shop_stmt->fetchColumn();
+// 自社ショップ一覧を取得
+$ownShops = $pdo->query("SELECT id, shop_name FROM shops WHERE is_own_shop = 1 ORDER BY id")->fetchAll();
+if (!$selectedShopId && !empty($ownShops)) {
+    $selectedShopId = $ownShops[0]['id'];
+}
 
+// 商品一覧取得
+$products = $pdo->query("SELECT * FROM products ORDER BY sort_order ASC, id DESC")->fetchAll();
+
+// 価格取得関数（全店舗分）
 function getLatestPrices($pdo, $productId) {
     $stmt = $pdo->prepare("
         SELECT si.id, si.price, si.shop_id, s.shop_name, s.is_own_shop
@@ -24,9 +30,21 @@ function getLatestPrices($pdo, $productId) {
 }
 ?>
 
-<h1 class="mb-4">価格比較（自社 vs 競合）</h1>
+<h1 class="mb-3">価格比較（自社 vs 競合）</h1>
 
-<table class="table table-bordered table-hover align-middle">
+<!-- ✅ 自社店舗切り替え -->
+<form method="get" class="mb-4 d-flex align-items-center">
+    <label for="my_shop" class="me-2 fw-bold">比較基準の自社店舗：</label>
+    <select name="my_shop_id" id="my_shop" class="form-select w-auto" onchange="this.form.submit()">
+        <?php foreach ($ownShops as $shop): ?>
+            <option value="<?= $shop['id'] ?>" <?= $selectedShopId == $shop['id'] ? 'selected' : '' ?>>
+                <?= htmlspecialchars($shop['shop_name']) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</form>
+
+<table id="priceTable" class="table table-bordered table-hover align-middle">
     <thead class="table-light">
         <tr>
             <th style="width: 80px;">画像</th>
@@ -41,16 +59,16 @@ function getLatestPrices($pdo, $productId) {
     <?php foreach ($products as $product): 
         $prices = getLatestPrices($pdo, $product['id']);
         $myPrice = null;
-        $myShopName = null;
-        $minCompPrice = null;
-        $minCompShopName = null;
         $myShopItemId = null;
+        $minCompPrice = null;
+        $myShopName = '';
+        $minCompShopName = '';
 
         foreach ($prices as $p) {
-            if ($p['is_own_shop']) {
+            if ($p['shop_id'] == $selectedShopId) {
                 $myPrice = $p['price'];
-                $myShopName = $p['shop_name'];
                 $myShopItemId = $p['id'];
+                $myShopName = $p['shop_name'];
             } else {
                 if ($minCompPrice === null || $p['price'] < $minCompPrice) {
                     $minCompPrice = $p['price'];
@@ -59,9 +77,7 @@ function getLatestPrices($pdo, $productId) {
             }
         }
 
-        $diff = ($myPrice !== null && $minCompPrice !== null)
-            ? $myPrice - $minCompPrice
-            : null;
+        $diff = ($myPrice !== null && $minCompPrice !== null) ? $myPrice - $minCompPrice : null;
     ?>
     <tr>
         <td><img src="<?= htmlspecialchars($product['image_url']) ?>" style="height: 60px; width: auto;"></td>
@@ -70,10 +86,10 @@ function getLatestPrices($pdo, $productId) {
             <small>カテゴリ：<?= htmlspecialchars($product['category']) ?></small>
         </td>
         <td class="text-primary fw-bold">
-            <?= $myPrice !== null ? '¥' . number_format($myPrice) . '<br><small class="text-muted">' . htmlspecialchars($myShopName) . '</small>' : '-' ?>
+            <?= $myPrice !== null ? "¥" . number_format($myPrice) . "<br><small>（{$myShopName}）</small>" : '-' ?>
         </td>
         <td>
-            <?= $minCompPrice !== null ? '¥' . number_format($minCompPrice) . '<br><small class="text-muted">' . htmlspecialchars($minCompShopName) . '</small>' : '-' ?>
+            <?= $minCompPrice !== null ? "¥" . number_format($minCompPrice) . "<br><small>（{$minCompShopName}）</small>" : '-' ?>
         </td>
         <td class="<?= $diff > 0 ? 'text-danger' : ($diff < 0 ? 'text-success' : '') ?>">
             <?= $diff !== null ? (($diff > 0 ? '+' : '') . '¥' . number_format($diff)) : '-' ?>
@@ -81,7 +97,7 @@ function getLatestPrices($pdo, $productId) {
         <td>
             <?php if ($myShopItemId): ?>
                 <a href="edit.php?id=<?= $myShopItemId ?>" class="btn btn-sm btn-outline-secondary">編集</a>
-               <a href="../price_history/chart.php?id=<?= $product['id'] ?>" class="btn btn-sm btn-outline-info">📊 履歴</a>
+                <a href="../price_history/chart.php?id=<?= $product['id'] ?>" class="btn btn-sm btn-outline-info">📊 履歴</a>
             <?php else: ?>
                 <span class="text-muted">自社商品未登録</span>
             <?php endif; ?>
@@ -90,5 +106,17 @@ function getLatestPrices($pdo, $productId) {
     <?php endforeach; ?>
     </tbody>
 </table>
+
+<script>
+$(document).ready(function() {
+    $('#priceTable').DataTable({
+        language: {
+            url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/ja.json"
+        },
+        pageLength: 25,
+        order: []  // 初期ソートなし
+    });
+});
+</script>
 
 <?php include '../layout/footer.php'; ?>
