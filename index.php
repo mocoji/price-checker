@@ -1,8 +1,14 @@
 <?php
 require_once __DIR__ . '/auth.php';
 require_login();
+require_once __DIR__ . '/db.php';
+
 $pageTitle = "ダッシュボード";
 include __DIR__ . '/layout/header.php';
+
+// 商品一覧取得（グラフ選択用）
+$stmt = $pdo->query("SELECT id, name FROM products ORDER BY name");
+$products = $stmt->fetchAll();
 ?>
 
 <h1 class="mb-4">楽天価格比較システム 管理画面</h1>
@@ -13,7 +19,7 @@ include __DIR__ . '/layout/header.php';
             <div class="card-body">
                 <h5 class="card-title">🏪 店舗マスタ管理</h5>
                 <p class="card-text">自社・競合店舗の情報を管理します。</p>
-                <a href="shops/list.php" class="btn btn-outline-primary">開く</a>
+                <a href="shops/list.php" class="btn btn-outline-primary">店舗登録</a>
             </div>
         </div>
     </div>
@@ -23,23 +29,22 @@ include __DIR__ . '/layout/header.php';
             <div class="card-body">
                 <h5 class="card-title">📦 商品マスタ管理</h5>
                 <p class="card-text">商品情報を登録し、価格比較のベースにします。</p>
-               <a href="products/add.php" class="btn btn-outline-primary">＋ 商品登録</a>
-                <a href="products/list.php" class="btn btn-outline-secondary">📋 商品一覧</a><br>
+                <a href="products/add.php" class="btn btn-outline-primary">＋ 商品登録</a>
+                <a href="products/list.php" class="btn btn-outline-secondary">📋 商品一覧</a>
             </div>
         </div>
     </div>
-	
-	<div class="col">
-    <div class="card shadow-sm h-100">
-        <div class="card-body">
-            <h5 class="card-title">🧩 競合統合</h5>
-            <p class="card-text">類似商品を統合して、価格比較の精度を高めます。</p>
-            <a href="products/merge.php" class="btn btn-outline-primary">統合ツールを開く</a>
+
+    <div class="col">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">🧩 競合統合</h5>
+                <p class="card-text">類似商品を統合して、価格比較の精度を高めます。</p>
+                <a href="products/merge.php" class="btn btn-outline-primary">統合登録</a>
+            </div>
         </div>
     </div>
-</div>
 
-	
     <div class="col">
         <div class="card shadow-sm h-100">
             <div class="card-body">
@@ -66,7 +71,7 @@ include __DIR__ . '/layout/header.php';
             <div class="card-body">
                 <h5 class="card-title">👤 ユーザー登録</h5>
                 <p class="card-text">ログインユーザーと権限を管理します。</p>
-                <a href="users/add.php" class="btn btn-outline-primary">開く</a>
+                <a href="users/add.php" class="btn btn-outline-primary">登録</a>
             </div>
         </div>
     </div>
@@ -92,5 +97,36 @@ include __DIR__ . '/layout/header.php';
         </div>
     </div>
 </div>
+
+<!-- 📊 商品選択式価格履歴表示 -->
+<div class="card shadow-sm mt-4">
+    <div class="card-body">
+        <h5 class="card-title">📊 任意の商品で価格履歴を確認</h5>
+        <form id="chartForm" class="row row-cols-lg-auto g-3 align-items-center">
+            <div class="col-12">
+                <label class="form-label" for="product_id">商品を選択：</label>
+                <select class="form-select" name="product_id" id="product_id" required>
+                    <option value="">-- 選択してください --</option>
+                    <?php foreach ($products as $p): ?>
+                        <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-outline-info">グラフを表示</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('chartForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const id = document.getElementById('product_id').value;
+    if (id) {
+        window.location.href = 'price_history/chart.php?id=' + encodeURIComponent(id);
+    }
+});
+</script>
 
 <?php include __DIR__ . '/layout/footer.php'; ?>

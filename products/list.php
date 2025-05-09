@@ -17,6 +17,12 @@ function getShopPrices($pdo, $productId) {
     $stmt->execute([$productId]);
     return $stmt->fetchAll();
 }
+
+if (!empty($_SESSION['price_update_done'])) {
+    echo "<script>alert('全商品の価格取得が完了しました');</script>";
+    unset($_SESSION['price_update_done']);
+}
+
 ?>
 <h1 class="mb-4">商品一覧</h1>
 

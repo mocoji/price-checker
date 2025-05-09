@@ -3,9 +3,9 @@ require_once '../auth.php';
 require_login();
 require_once '../db.php';
 
-// 楽天APIのアプリID（※自身のキーに差し替えてください）
-require_once '../lib/rakuten.php'; //
-$applicationId = getRakutenApplicationId(); // 
+// 楽天APIのアプリID
+require_once '../lib/rakuten.php';
+$applicationId = getRakutenApplicationId();
 
 if (!$applicationId) {
     exit("楽天APIのアプリIDが設定されていません。");
@@ -41,15 +41,26 @@ foreach ($items as $item) {
 
     if (!empty($data['Items'][0]['Item'])) {
         $price = $data['Items'][0]['Item']['itemPrice'];
+
+        // ✅ shop_items を更新
         $stmt = $pdo->prepare("UPDATE shop_items SET price = ?, last_checked = NOW() WHERE id = ?");
         $stmt->execute([$price, $item['id']]);
+
+        // ✅ price_history に履歴を保存（追加）
+        $stmt = $pdo->prepare("
+            INSERT INTO price_history (shop_item_id, price, recorded_at)
+            VALUES (?, ?, NOW())
+        ");
+        $stmt->execute([$item['id'], $price]);
+
         $updated++;
     } else {
         $skipped++;
     }
 
-    // APIレート制限対策：必要なら sleep(1);
+    // sleep(1); // APIレート制限対策（必要に応じて）
 }
 
+$_SESSION['price_update_done'] = true;
 header("Location: list.php");
 exit;

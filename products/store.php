@@ -25,12 +25,21 @@ if (!$product_id) {
     $product_id = $pdo->lastInsertId();
 }
 
-// STEP 2: shop_items に登録（同一shop_id + product_id があればスキップでもよい）
+// STEP 2: shop_items に登録
 $stmt = $pdo->prepare("
-    INSERT INTO shop_items (product_id, shop_id, item_code, price, url, last_checked)
-    VALUES (?, ?, ?, ?, '', NOW())
+    INSERT INTO shop_items (product_id, shop_id, item_code, price, url, last_checked, is_latest)
+    VALUES (?, ?, ?, ?, '', NOW(), 1)
 ");
 $stmt->execute([$product_id, $shop_id, $item_code, $price]);
+
+$shopItemId = $pdo->lastInsertId(); // ← ここでshop_items.idを取得
+
+// ✅ STEP 3: 履歴テーブルに記録
+$stmt = $pdo->prepare("
+    INSERT INTO price_history (shop_item_id, price, recorded_at)
+    VALUES (?, ?, NOW())
+");
+$stmt->execute([$shopItemId, $price]);
 
 header("Location: ../shop_items/list.php");
 exit;

@@ -1,96 +1,120 @@
 <?php
-require '../db.php';
+require_once '../auth.php';
+require_login();
+require_once '../db.php';
 
-// 商品ID指定（GETパラメータで ?id=●）
 $product_id = $_GET['id'] ?? null;
-if (!$product_id) {
-    die("商品IDが必要です。");
-}
+if (!$product_id) die("商品IDが必要です。");
 
-// 商品名取得
 $stmt = $pdo->prepare("SELECT name FROM products WHERE id = ?");
 $stmt->execute([$product_id]);
 $product = $stmt->fetch();
 if (!$product) die("商品が見つかりません");
 
-// 店舗ごとに履歴データを取得
 $stmt = $pdo->prepare("
     SELECT ph.price, ph.recorded_at, s.shop_name
     FROM price_history ph
     JOIN shop_items si ON ph.shop_item_id = si.id
     JOIN shops s ON si.shop_id = s.id
+    JOIN (
+        SELECT shop_item_id, DATE(recorded_at) as date, MAX(recorded_at) as latest_recorded
+        FROM price_history
+        GROUP BY shop_item_id, DATE(recorded_at)
+    ) latest
+    ON ph.shop_item_id = latest.shop_item_id
+    AND DATE(ph.recorded_at) = latest.date
+    AND ph.recorded_at = latest.latest_recorded
     WHERE si.product_id = ?
-    ORDER BY s.shop_name, ph.recorded_at
+    ORDER BY ph.recorded_at
 ");
 $stmt->execute([$product_id]);
 $rows = $stmt->fetchAll();
 
-// 店舗別にグループ化
+// データを店舗別に整理
 $data = [];
+$all_dates = [];
 foreach ($rows as $row) {
     $shop = $row['shop_name'];
-    $time = $row['recorded_at'];
+    $date = $row['recorded_at'];
     $price = $row['price'];
-    $data[$shop]['labels'][] = $time;
-    $data[$shop]['data'][] = $price;
+
+    $data[$shop][$date] = $price;
+    $all_dates[$date] = true;
 }
+
+$all_dates = array_keys($all_dates);
+sort($all_dates);
+
+// 各店舗に対して全ての日付を持たせ、なければnull
+$datasets = [];
+foreach ($data as $shop => $prices_by_date) {
+    $dataset = [];
+    foreach ($all_dates as $date) {
+        $dataset[] = $prices_by_date[$date] ?? null;
+    }
+    $datasets[] = [
+        'label' => $shop,
+        'data' => $dataset,
+        'borderWidth' => 2,
+        'fill' => false,
+        'tension' => 0.3
+    ];
+}
+
+$pageTitle = "価格履歴グラフ";
+include '../layout/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>価格履歴グラフ</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <h1>価格履歴：<?= htmlspecialchars($product['name']) ?></h1>
-    <a href="../shop_items/list.php">← 商品一覧に戻る</a>
-    <canvas id="priceChart" width="900" height="400"></canvas>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><?= htmlspecialchars($product['name']) ?> の価格履歴</h2>
+        <a href="../shop_items/list.php" class="btn btn-outline-secondary">← 商品一覧に戻る</a>
+    </div>
 
-    <script>
-        const ctx = document.getElementById('priceChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: <?= json_encode(array_values(reset($data)['labels'] ?? [])) ?>,
-                datasets: [
-                    <?php foreach ($data as $shopName => $shopData): ?>
-                    {
-                        label: <?= json_encode($shopName) ?>,
-                        data: <?= json_encode($shopData['data']) ?>,
-                        borderWidth: 2,
-                        fill: false,
-                        tension: 0.2
-                    },
-                    <?php endforeach; ?>
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: '店舗別価格推移'
-                    }
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">📈 店舗別 価格推移グラフ</h5>
+            <canvas id="priceChart" height="80"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = <?= json_encode($all_dates) ?>;
+    const datasets = <?= json_encode($datasets) ?>;
+
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                    // デフォルトの凡例クリックで表示/非表示OK
                 },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        title: {
-                            display: true,
-                            text: '価格 (円)'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: '日付'
-                        }
+                tooltip: {
+                    callbacks: {
+                        label: ctx => '¥' + ctx.formattedValue
                     }
                 }
+            },
+            scales: {
+                y: {
+                    title: { display: true, text: '価格（円）' }
+                },
+                x: {
+                    title: { display: true, text: '記録日時' }
+                }
             }
-        });
-    </script>
-</body>
-</html>
+        }
+    });
+</script>
+
+<?php include '../layout/footer.php'; ?>
