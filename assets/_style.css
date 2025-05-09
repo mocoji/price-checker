@@ -1,0 +1,41 @@
+@charset "utf-8";
+/* CSS Document */
+
+/* === 全体の基本スタイル === */
+body {
+    background-color: #f8f9fa;
+    font-size: 15px;
+}
+
+h1 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* === ナビバー強調 === */
+.navbar-brand {
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* === ボタン統一感 === */
+.btn {
+    min-width: 100px;
+}
+
+/* === テーブル行間調整 === */
+.table td, .table th {
+    vertical-align: middle;
+    padding: 0.6rem;
+}
+
+/* === フォーム調整 === */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+}
+
+input.form-control, select.form-control, textarea.form-control {
+    font-size: 14px;
+}

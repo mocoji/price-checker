@@ -45,7 +45,7 @@ foreach ($rows as $row) {
 </head>
 <body>
     <h1>価格履歴：<?= htmlspecialchars($item['item_name']) ?></h1>
-    <a href="../items/list.php">← 商品一覧に戻る</a>
+    <a href="../items/_list.php">← 商品一覧に戻る</a>
     <canvas id="priceChart" width="900" height="400"></canvas>
 
     <script>

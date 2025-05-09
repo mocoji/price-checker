@@ -2,12 +2,6 @@
 require_once '../auth.php';
 require_login();
 require_once '../db.php';
-$pageTitle = "ユーザー登録";
-include '../layout/header.php';
-
-if (!is_admin()) {
-    die('管理者専用ページです。');
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
@@ -17,32 +11,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)");
     $stmt->execute([$username, $password, $role]);
 
-    log_action($pdo, 'ユーザー登録', "username=$username");
-
-    header('Location: ../index.php');
+    header("Location: list.php");
     exit;
 }
+
+$pageTitle = "ユーザー追加";
+include '../layout/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>ユーザー登録</title>
-</head>
-<body>
-    <h1>新規ユーザー登録</h1>
-    <a href="../index.php">← 戻る</a>
-    <form method="post">
-        <label>ユーザー名：<input type="text" name="username" required></label><br><br>
-        <label>パスワード：<input type="password" name="password" required></label><br><br>
-        <label>権限：
-            <select name="role">
-                <option value="viewer">viewer（閲覧専用）</option>
-                <option value="editor">editor（編集可能）</option>
-                <option value="admin">admin（管理者）</option>
-            </select>
-        </label><br><br>
-        <button type="submit">登録する</button>
-    </form>
+<h1 class="mb-4">新規ユーザー登録</h1>
+
+<form method="post" class="card p-4 shadow-sm" style="max-width: 600px;">
+    <div class="mb-3">
+        <label for="username" class="form-label">ユーザー名</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="password" class="form-label">パスワード</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+
+    <div class="mb-4">
+        <label for="role" class="form-label">権限</label>
+        <select name="role" id="role" class="form-select" required>
+            <option value="">-- 選択してください --</option>
+            <option value="admin">管理者（admin）</option>
+            <option value="editor">編集者（editor）</option>
+            <option value="viewer">閲覧のみ（viewer）</option>
+        </select>
+    </div>
+
+    <div class="d-flex justify-content-between">
+        <a href="list.php" class="btn btn-outline-secondary">戻る</a>
+        <button type="submit" class="btn btn-primary">登録する</button>
+    </div>
+</form>
+
 <?php include '../layout/footer.php'; ?>

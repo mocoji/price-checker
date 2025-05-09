@@ -1,41 +1,78 @@
-@charset "utf-8";
-/* CSS Document */
 
-/* === 全体の基本スタイル === */
+/* === 全体ベーススタイル === */
 body {
-    background-color: #f8f9fa;
+    background-color: #f3f4f6;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 15px;
+    line-height: 1.6;
 }
 
-h1 {
-    font-size: 1.6rem;
+/* === 見出し === */
+h1, h2 {
     font-weight: 600;
-    margin-bottom: 1.5rem;
+    color: #333;
+    margin-bottom: 1rem;
 }
 
-/* === ナビバー強調 === */
-.navbar-brand {
-    font-weight: bold;
-    letter-spacing: 1px;
-}
-
-/* === ボタン統一感 === */
+/* === ボタン === */
 .btn {
-    min-width: 100px;
+    min-width: 120px;
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    transition: all 0.2s ease;
 }
 
-/* === テーブル行間調整 === */
+.btn-primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+.btn-primary:hover {
+    background-color: #1e40af;
+    border-color: #1e40af;
+}
+
+.btn-outline-danger:hover {
+    background-color: #ef4444;
+    color: white;
+}
+
+/* === テーブル === */
+.table th {
+    background-color: #f9fafb;
+    font-weight: 500;
+}
 .table td, .table th {
     vertical-align: middle;
     padding: 0.6rem;
 }
 
-/* === フォーム調整 === */
+/* === フォーム === */
 .form-label {
     font-weight: 500;
-    margin-bottom: 0.2rem;
 }
-
-input.form-control, select.form-control, textarea.form-control {
+.form-control {
+    border-radius: 6px;
     font-size: 14px;
 }
+
+/* === ナビバー === */
+.navbar {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+}
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+}
+
+.card-img-top {
+    height: 220px;
+    width: auto;
+    max-width: 100%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
